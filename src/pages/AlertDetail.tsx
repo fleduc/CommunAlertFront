@@ -8,6 +8,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 interface Message {
     id: number;
     content: string;
+    sender: {id: number, username: string};
     reactions: { [emoji: string]: number };
     read: boolean;
     sender_id: number;
@@ -86,23 +87,6 @@ const AlertDetail: React.FC = () => {
         }
     };
 
-    const handleAddReaction = async (messageId: number, emoji: string) => {
-        try {
-            const res = await fetch(`${API_URL}/messages/${messageId}/reactions`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ emoji }),
-            });
-            if (!res.ok) throw new Error('Erreur lors de l’ajout de la réaction');
-            fetchAlertDetail();
-        } catch (err: any) {
-            setError(err.message);
-        }
-    };
-
     return (
         <div className="p-4">
             {error && <p className="text-red-500">{error}</p>}
@@ -114,23 +98,15 @@ const AlertDetail: React.FC = () => {
                     <h2 className="text-2xl font-bold mt-8">Messages</h2>
                     <ul>
                         {alertData.messages?.map((message) => {
+                            console.log("message", message)
                             const isMine = message.sender_id === currentUserId;
                             return (
                                 <li key={message.id} className="mb-2">
-                                    <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
-                                        <div className={`p-4 rounded ${isMine ? "bg-blue-100" : "bg-gray-100"}`}>
+                                    <div className={`flex ${isMine ? "justify-end ml-6" : "justify-start mr-6"}`}>
+                                        <div className={`message p-4 rounded ${isMine ? "bg-blue-100" : "bg-gray-100"}`}>
                                             <p>{message.content}</p>
-                                            <div className="mt-2 flex items-center space-x-2">
-                                                <button onClick={() => handleAddReaction(message.id, '👍')} className="p-1 border rounded">
-                                                    👍
-                                                </button>
-                                                <button onClick={() => handleAddReaction(message.id, '❤️')} className="p-1 border rounded">
-                                                    ❤️
-                                                </button>
-                                                <button onClick={() => handleAddReaction(message.id, '😂')} className="p-1 border rounded">
-                                                    😂
-                                                </button>
-                                                <span className="text-sm">Réactions : {JSON.stringify(message.reactions)}</span>
+                                            <div className={`${isMine ? "text-right" : "text-left"}`}>
+                                                <span className="italic text-xs font-bold">{message.sender.username}</span>
                                             </div>
                                         </div>
                                     </div>
