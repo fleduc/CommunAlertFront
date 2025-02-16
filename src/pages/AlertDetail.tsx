@@ -1,6 +1,7 @@
 // src/pages/AlertDetail.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -9,7 +10,7 @@ interface Message {
     content: string;
     reactions: { [emoji: string]: number };
     read: boolean;
-    sender_id: number; // L'API doit renvoyer cet identifiant pour chaque message
+    sender_id: number;
 }
 
 interface Alert {
@@ -26,42 +27,33 @@ interface Alert {
 
 const AlertDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    console.log("ID de l'alerte :", id);
-
+    const { user } = useAuth(); // user contient les infos de l'utilisateur connecté
+    const currentUserId = user ? user.id : 0; // Si user n'est pas défini, on peut définir 0 ou gérer le cas différemment
     const [alertData, setAlertData] = useState<Alert | null>(null);
     const [newMessage, setNewMessage] = useState('');
     const [error, setError] = useState('');
 
-    // Récupérer l'identifiant de l'utilisateur connecté (stocké lors du login)
-    const currentUserId = Number(localStorage.getItem('user_id'));
-
-    // Fonction pour récupérer les détails de l'alerte et la liste de ses messages
     const fetchAlertDetail = async () => {
         if (!id) {
             setError("Aucun ID d'alerte fourni.");
             return;
         }
         try {
-            const token = localStorage.getItem('token');
-            console.log("Token récupéré :", token);
-
-            // Récupérer les informations de l'alerte
             const resAlert = await fetch(`${API_URL}/alerts/${id}`, {
-                headers: { 'Authorization': `Bearer ${token}` },
+                method: 'GET',
+                credentials: 'include',
             });
-            if (!resAlert.ok)
-                throw new Error('Erreur lors de la récupération des détails de l’alerte');
+
+            if (!resAlert.ok) throw new Error('Erreur lors de la récupération des détails de l’alerte');
             const alertInfo = await resAlert.json();
 
-            // Récupérer les messages relatifs à l'alerte
             const resMessages = await fetch(`${API_URL}/alerts/${id}/messages/`, {
-                headers: { 'Authorization': `Bearer ${token}` },
+                method: 'GET',
+                credentials: 'include',
             });
-            if (!resMessages.ok)
-                throw new Error('Erreur lors de la récupération des messages');
+            if (!resMessages.ok) throw new Error('Erreur lors de la récupération des messages');
             const messages = await resMessages.json();
 
-            // Fusionner les données
             setAlertData({
                 ...alertInfo,
                 messages,
@@ -78,12 +70,11 @@ const AlertDetail: React.FC = () => {
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('token');
             const res = await fetch(`${API_URL}/alerts/${id}/messages/`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify({ content: newMessage }),
             });
@@ -97,12 +88,11 @@ const AlertDetail: React.FC = () => {
 
     const handleAddReaction = async (messageId: number, emoji: string) => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await fetch(`${API_URL.replace("/api", "")}/api/messages/${messageId}/reactions`, {
+            const res = await fetch(`${API_URL}/messages/${messageId}/reactions`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify({ emoji }),
             });
@@ -127,34 +117,21 @@ const AlertDetail: React.FC = () => {
                             const isMine = message.sender_id === currentUserId;
                             return (
                                 <li key={message.id} className="mb-2">
-                                    <div className={`flex ${isMine ? "justify-end mine" : "justify-start"}`}>
+                                    <div className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
                                         <div className={`p-4 rounded ${isMine ? "bg-blue-100" : "bg-gray-100"}`}>
                                             <p>{message.content}</p>
-                                            {/*  Work in Progress...
                                             <div className="mt-2 flex items-center space-x-2">
-                                                <button
-                                                    onClick={() => handleAddReaction(message.id, '👍')}
-                                                    className="p-1 border rounded"
-                                                >
+                                                <button onClick={() => handleAddReaction(message.id, '👍')} className="p-1 border rounded">
                                                     👍
                                                 </button>
-                                                <button
-                                                    onClick={() => handleAddReaction(message.id, '❤️')}
-                                                    className="p-1 border rounded"
-                                                >
+                                                <button onClick={() => handleAddReaction(message.id, '❤️')} className="p-1 border rounded">
                                                     ❤️
                                                 </button>
-                                                <button
-                                                    onClick={() => handleAddReaction(message.id, '😂')}
-                                                    className="p-1 border rounded"
-                                                >
+                                                <button onClick={() => handleAddReaction(message.id, '😂')} className="p-1 border rounded">
                                                     😂
                                                 </button>
-                                                <span className="text-sm">
-                                                  Réactions : {JSON.stringify(message.reactions)}
-                                                </span>
+                                                <span className="text-sm">Réactions : {JSON.stringify(message.reactions)}</span>
                                             </div>
-                                            */}
                                         </div>
                                     </div>
                                 </li>

@@ -18,9 +18,11 @@ const AlertsList: React.FC = () => {
 
     const fetchAlerts = async () => {
         try {
-            const token = localStorage.getItem('token');
+            //const token = localStorage.getItem('token');
             const res = await fetch(`${API_URL}/alerts`, {
-                headers: { 'Authorization': `Bearer ${token}` },
+                method: 'GET',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
             });
             if (!res.ok) throw new Error('Erreur lors de la récupération des alertes');
             const data = await res.json();
@@ -44,6 +46,7 @@ const AlertsList: React.FC = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
+                credentials: 'include',
                 body: JSON.stringify({ title, description }),
             });
             if (!res.ok) throw new Error('Erreur lors de la création de l’alerte');
