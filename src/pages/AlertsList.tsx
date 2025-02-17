@@ -1,30 +1,59 @@
 // src/pages/AlertsList.tsx
+/**
+ * AlertsList Page Component
+ *
+ * This component displays a list of alerts retrieved from an API
+ * and provides a form to create a new alert.
+ *
+ * @module AlertsList
+ */
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+/**
+ * Interface representing an alert object.
+ *
+ * @interface Alert
+ * @property {number} id - Unique identifier for the alert.
+ * @property {string} title - Title of the alert.
+ * @property {string} description - Description of the alert.
+ */
 interface Alert {
     id: number;
     title: string;
     description: string;
 }
 
+/**
+ * AlertsList component displays a list of alerts and allows the creation of new alerts.
+ *
+ * @component
+ * @returns {JSX.Element} The AlertsList component.
+ */
 const AlertsList: React.FC = () => {
     const [alerts, setAlerts] = useState<Alert[]>([]);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [error, setError] = useState('');
 
+    /**
+     * Fetches alerts from the API and updates the state.
+     *
+     * @async
+     * @function fetchAlerts
+     * @throws Will throw an error if the API call fails.
+     */
     const fetchAlerts = async () => {
         try {
-            //const token = localStorage.getItem('token');
+            // const token = localStorage.getItem('token');
             const res = await fetch(`${API_URL}/alerts`, {
                 method: 'GET',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
             });
-            if (!res.ok) throw new Error('Erreur lors de la récupération des alertes');
+            if (!res.ok) throw new Error('Error retrieving alerts');
             const data = await res.json();
             setAlerts(data);
         } catch (err: any) {
@@ -32,10 +61,19 @@ const AlertsList: React.FC = () => {
         }
     };
 
+    // Fetch alerts when the component mounts
     useEffect(() => {
         fetchAlerts();
     }, []);
 
+    /**
+     * Handles the form submission to create a new alert.
+     *
+     * @async
+     * @function handleCreateAlert
+     * @param {React.FormEvent} e - The form event.
+     * @throws Will throw an error if the API call fails.
+     */
     const handleCreateAlert = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
@@ -49,8 +87,8 @@ const AlertsList: React.FC = () => {
                 credentials: 'include',
                 body: JSON.stringify({ title, description }),
             });
-            if (!res.ok) throw new Error('Erreur lors de la création de l’alerte');
-            // Recharger la liste des alertes après création
+            if (!res.ok) throw new Error('Error creating alert');
+            // Reload the alerts list after creation
             await fetchAlerts();
             setTitle('');
             setDescription('');
@@ -61,7 +99,7 @@ const AlertsList: React.FC = () => {
 
     return (
         <div className="p-4">
-            <h1 className="text-3xl font-bold mb-4">Liste des alertes</h1>
+            <h1 className="text-3xl font-bold mb-4">Alerts List</h1>
             {error && <p className="text-red-500">{error}</p>}
             <ul>
                 {alerts.map((alert) => (
@@ -73,10 +111,10 @@ const AlertsList: React.FC = () => {
                     </li>
                 ))}
             </ul>
-            <h2 className="text-2xl font-bold mt-8">Créer une nouvelle alerte</h2>
+            <h2 className="text-2xl font-bold mt-8">Create a New Alert</h2>
             <form onSubmit={handleCreateAlert} className="mt-4">
                 <div className="mb-4">
-                    <label className="block mb-1">Titre</label>
+                    <label className="block mb-1">Title</label>
                     <input
                         type="text"
                         className="w-full border border-gray-300 p-2 rounded"
@@ -95,7 +133,7 @@ const AlertsList: React.FC = () => {
                     ></textarea>
                 </div>
                 <button type="submit" className="bg-blue-500 text-white p-2 rounded">
-                    Créer l’alerte
+                    Create Alert
                 </button>
             </form>
         </div>

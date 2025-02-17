@@ -1,19 +1,54 @@
 // src/pages/AlertDetail.tsx
+/**
+ * AlertDetail Page Component
+ *
+ * This component displays the detailed information of an alert,
+ * including its messages, and provides a form to send a new message.
+ *
+ * @module AlertDetail
+ */
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+/**
+ * Interface representing a message.
+ *
+ * @interface Message
+ * @property {number} id - Unique identifier for the message.
+ * @property {string} content - Content of the message.
+ * @property {Object} sender - Information about the sender.
+ * @property {number} sender.id - Unique identifier for the sender.
+ * @property {string} sender.username - Username of the sender.
+ * @property {Object.<string, number>} reactions - Reactions on the message, mapping emoji to count.
+ * @property {boolean} read - Indicates whether the message has been read.
+ * @property {number} sender_id - The sender's unique identifier (redundant with sender.id).
+ */
 interface Message {
     id: number;
     content: string;
-    sender: {id: number, username: string};
+    sender: { id: number; username: string };
     reactions: { [emoji: string]: number };
     read: boolean;
     sender_id: number;
 }
 
+/**
+ * Interface representing an alert.
+ *
+ * @interface Alert
+ * @property {number} id - Unique identifier for the alert.
+ * @property {string} alert_title - Title of the alert.
+ * @property {string} description - Description of the alert.
+ * @property {number} alert_type - Type of the alert.
+ * @property {string} [closing_date] - Optional closing date for the alert.
+ * @property {string} [postal_code] - Optional postal code.
+ * @property {string} created_at - Creation date of the alert.
+ * @property {number} user_id - ID of the user who created the alert.
+ * @property {Message[]} messages - List of messages associated with the alert.
+ */
 interface Alert {
     id: number;
     alert_title: string;
@@ -26,17 +61,33 @@ interface Alert {
     messages: Message[];
 }
 
+/**
+ * AlertDetail component displays detailed information about an alert,
+ * including its messages, and allows sending a new message.
+ *
+ * @component
+ * @returns {JSX.Element} The AlertDetail component.
+ */
 const AlertDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const { user } = useAuth(); // user contient les infos de l'utilisateur connecté
-    const currentUserId = user ? user.id : 0; // Si user n'est pas défini, on peut définir 0 ou gérer le cas différemment
+    // user contains the info of the logged-in user
+    const { user } = useAuth();
+    // If user is not defined, currentUserId defaults to 0 (or handle accordingly)
+    const currentUserId = user ? user.id : 0;
     const [alertData, setAlertData] = useState<Alert | null>(null);
     const [newMessage, setNewMessage] = useState('');
     const [error, setError] = useState('');
 
+    /**
+     * Fetches the alert details and its messages from the API.
+     *
+     * @async
+     * @function fetchAlertDetail
+     * @throws Will throw an error if the API call fails.
+     */
     const fetchAlertDetail = async () => {
         if (!id) {
-            setError("Aucun ID d'alerte fourni.");
+            setError("No alert ID provided.");
             return;
         }
         try {
@@ -44,15 +95,14 @@ const AlertDetail: React.FC = () => {
                 method: 'GET',
                 credentials: 'include',
             });
-
-            if (!resAlert.ok) throw new Error('Erreur lors de la récupération des détails de l’alerte');
+            if (!resAlert.ok) throw new Error('Error retrieving alert details');
             const alertInfo = await resAlert.json();
 
             const resMessages = await fetch(`${API_URL}/alerts/${id}/messages/`, {
                 method: 'GET',
                 credentials: 'include',
             });
-            if (!resMessages.ok) throw new Error('Erreur lors de la récupération des messages');
+            if (!resMessages.ok) throw new Error('Error retrieving messages');
             const messages = await resMessages.json();
 
             setAlertData({
@@ -68,6 +118,14 @@ const AlertDetail: React.FC = () => {
         fetchAlertDetail();
     }, [id]);
 
+    /**
+     * Handles the form submission to send a new message.
+     *
+     * @async
+     * @function handleSendMessage
+     * @param {React.FormEvent} e - The form event.
+     * @throws Will throw an error if the API call fails.
+     */
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
@@ -79,7 +137,7 @@ const AlertDetail: React.FC = () => {
                 },
                 body: JSON.stringify({ content: newMessage }),
             });
-            if (!res.ok) throw new Error('Erreur lors de l’envoi du message');
+            if (!res.ok) throw new Error('Error sending message');
             setNewMessage('');
             fetchAlertDetail();
         } catch (err: any) {
@@ -98,7 +156,7 @@ const AlertDetail: React.FC = () => {
                     <h2 className="text-2xl font-bold mt-8">Messages</h2>
                     <ul>
                         {alertData.messages?.map((message) => {
-                            console.log("message", message)
+                            console.log("message", message);
                             const isMine = message.sender_id === currentUserId;
                             return (
                                 <li key={message.id} className="mb-2">
@@ -116,7 +174,7 @@ const AlertDetail: React.FC = () => {
                     </ul>
                     <form onSubmit={handleSendMessage} className="mt-4">
                         <div className="mb-4">
-                            <label className="block mb-1">Nouveau message</label>
+                            <label className="block mb-1">New Message</label>
                             <textarea
                                 className="w-full border border-gray-300 p-2 rounded"
                                 value={newMessage}
@@ -125,12 +183,12 @@ const AlertDetail: React.FC = () => {
                             ></textarea>
                         </div>
                         <button type="submit" className="bg-blue-500 text-white p-2 rounded">
-                            Envoyer le message
+                            Send Message
                         </button>
                     </form>
                 </>
             ) : (
-                <p>Chargement…</p>
+                <p>Loading…</p>
             )}
         </div>
     );
