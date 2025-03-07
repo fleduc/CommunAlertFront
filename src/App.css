@@ -47,3 +47,8 @@ html, body, #root {
 .message {
   min-width: 300px;
 }
+
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid #bbb; /* Couleur plus discrète */
+  outline-offset: 2px;
+}
