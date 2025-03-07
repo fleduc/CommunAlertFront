@@ -11,6 +11,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import MessageItem from '../components/MessageItem';
+import AlertHeader from '../components/AlertHeader';
 import { Alert } from '../types/models';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -166,10 +167,8 @@ const AlertDetail: React.FC = () => {
             {error && <p className="text-red-500">{error}</p>}
             {alertData ? (
                 <>
-                    <h1 className="text-3xl font-bold mb-2">{alertData.alert_title}</h1>
-                    <p className="mb-4">{alertData.description}</p>
-
-                    <h2 className="text-2xl font-bold mt-8">Messages</h2>
+                    <AlertHeader title={alertData.alert_title} description={alertData.description}/>
+                    <hr className={"my-5"}/>
                     <ul>
                         {alertData.messages?.map((message) => {
                             console.log("message", message);

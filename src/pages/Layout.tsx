@@ -23,7 +23,7 @@ const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
         <div className="flex items-center justify-center h-screen w-screen">
             <div className="flex flex-col h-screen md:w-1/3">
                 <Header />
-                <div className="w-full px-4 py-4">
+                <div className="app-body w-full px-4 py-4">
                     {children}
                 </div>
             </div>
