@@ -16,6 +16,7 @@ import Layout from './pages/Layout';
 import Login from './pages/Login';
 import AlertsList from './pages/AlertsList';
 import AlertDetail from './pages/AlertDetail';
+import AlertEdit from './pages/AlertEdit';
 
 /**
  * ProtectedRoutes component that ensures only authenticated users can access certain routes.
@@ -36,6 +37,8 @@ const ProtectedRoutes: React.FC = () => {
             <Routes>
                 <Route path="/alerts" element={<AlertsList />} />
                 <Route path="/alerts/:id" element={<AlertDetail />} />
+                <Route path="alerts/edit/:id" element={<AlertEdit />} />
+                <Route path="alerts/create" element={<AlertEdit />} />
                 <Route path="*" element={<Navigate to="/alerts" />} />
             </Routes>
         </Layout>
