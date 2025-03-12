@@ -3,8 +3,12 @@
  * AlertsList Page Component
  *
  * This component displays a list of alerts retrieved from an API
- * and provides a footer with location, a radius in kilometers,
- * and a button to add a new alert.
+ * in fixed-height cards (h-32) that show a background image,
+ * the alert title, a snippet of the description (up to 3 lines with ellipsis),
+ * and key fields: alert type, status, severity_level, public_status, and the creator's username.
+ * If the logged-in user is the alert's creator, an edit button (pencil icon) is shown at the bottom-right.
+ *
+ * A footer is provided with location, a radius in kilometers, and a button to add a new alert.
  *
  * @module AlertsList
  */
@@ -21,18 +25,30 @@ const API_URL = import.meta.env.VITE_API_URL;
  * @property {number} id - Unique identifier for the alert.
  * @property {string} alert_title - Title of the alert.
  * @property {string} description - Description of the alert.
- * @property {number} user_id - The ID of the user who created the alert.
+ * @property {number} alert_type - Numeric value representing the alert type.
+ * @property {string} status - Current status of the alert.
+ * @property {string} severity_level - Severity level (e.g., "low", "medium", "high").
+ * @property {boolean} public_status - Whether the alert is public.
+ * @property {string} [picture] - URL for the alert's picture.
+ * @property {number} user_id - ID of the user who created the alert.
+ * @property {{ username: string }} user - Creator's user object.
  */
 interface Alert {
     id: number;
     alert_title: string;
     description: string;
+    alert_type: number;
+    status: string;
+    severity_level: string;
+    public_status: boolean;
+    picture?: string;
     user_id: number;
+    user: { username: string };
 }
 
 /**
- * AlertsList component displays a list of alerts and allows navigation
- * to create a new alert.
+ * AlertsList component displays a list of alerts in fixed-height cards,
+ * and a footer with location, radius, and an "Add Alert" button.
  *
  * @component
  * @returns {JSX.Element} The AlertsList component.
@@ -65,31 +81,59 @@ const AlertsList: React.FC = () => {
         }
     };
 
-    // Fetch alerts when the component mounts
     useEffect(() => {
         fetchAlerts();
     }, []);
 
     return (
-        <div className="p-4 flex flex-col min-h-screen">
-            <h1 className="text-3xl font-bold mb-4">Alerts List</h1>
+        // Assume the Layout already sets a fixed viewport height and provides a scrollable container.
+        <div className="flex flex-col h-full -mr-2">
+            <h1 className="text-3xl font-bold mb-4">List of alerts in your region</h1>
             {error && <p className="text-red-500">{error}</p>}
-            <ul className="flex-1">
+            {/* Alerts list area (scrollable) */}
+            <ul className="flex-1 space-y-4 overflow-y-auto">
                 {alerts.map((alert) => (
-                    <li key={alert.id} className="border p-4 rounded mb-2 hover:bg-gray-100 flex justify-between items-center">
-                        <div>
-                            <Link to={`/alerts/${alert.id}`}>
-                                <h2 className="text-xl font-semibold">{alert.alert_title}</h2>
-                                <p>{alert.description}</p>
-                            </Link>
-                        </div>
+                    <li
+                        key={alert.id}
+                        className="relative h-32 overflow-hidden bg-cover bg-center rounded-lg mr-2"
+                        style={{ backgroundImage: alert.picture ? `url(${alert.picture})` : undefined }}
+                    >
+                        <Link to={`/alerts/${alert.id}`} className="block h-full w-full">
+                            {/* Overlay for readability */}
+                            <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+                            {/* Card content */}
+                            <div className="relative h-full p-2 text-white flex flex-col justify-between">
+                                <div>
+                                    <h2 className="text-2xl font-semibold line-clamp-1">
+                                        {alert.alert_title}
+                                    </h2>
+                                    <p className="text-sm line-clamp-3">
+                                        {alert.description}
+                                    </p>
+                                </div>
+                                <div className="text-[10px] flex flex-wrap gap-1">
+                                    <span>Type: {alert.alert_type}</span>
+                                    <span>|</span>
+                                    <span>Status: {alert.status}</span>
+                                    <span>|</span>
+                                    <span>Severity: {alert.severity_level}</span>
+                                    <span>|</span>
+                                    <span>Public: {alert.public_status ? 'Yes' : 'No'}</span>
+                                    <span>|</span>
+                                    <span>By: {alert.user?.username || 'Unknown'}</span>
+                                </div>
+                            </div>
+                        </Link>
                         {user && user.id === alert.user_id && (
                             <button
-                                onClick={() => navigate(`/alerts/edit/${alert.id}`)}
-                                className="ml-4 p-2 bg-gray-200 hover:bg-gray-300 rounded"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/alerts/edit/${alert.id}`);
+                                }}
+                                className="absolute bottom-1 right-1 bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs"
                                 title="Edit Alert"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z" />
                                 </svg>
                             </button>
@@ -118,7 +162,7 @@ const AlertsList: React.FC = () => {
                     <div>
                         <span className="text-sm text-gray-700">Radius: 10 km</span>
                     </div>
-                    {/* Right Section: Button to add a new alert */}
+                    {/* Right Section: Add Alert button */}
                     <div>
                         <button
                             onClick={() => navigate('/alerts/create')}

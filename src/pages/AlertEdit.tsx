@@ -122,7 +122,7 @@ const AlertEdit: React.FC = () => {
         try {
             let res;
             const formData = new FormData();
-            // Create a payload object with all alert fields (exclude "image" because that's handled separately)
+            // Create a payload object with all alert fields (excluding the image)
             const payload = {
                 alert_title: alertData.alert_title,
                 description: alertData.description,
@@ -139,8 +139,7 @@ const AlertEdit: React.FC = () => {
             };
             // Append the alert data as a JSON string under the key "alert"
             formData.append('alert', JSON.stringify(payload));
-
-            // Append the image file only if provided
+            // Append the image file if one is selected
             if (alertData.image) {
                 formData.append('file', alertData.image);
             }
@@ -158,7 +157,6 @@ const AlertEdit: React.FC = () => {
                     body: formData,
                 });
             }
-
             if (!res.ok) {
                 throw new Error(isEditing ? 'Error updating alert' : 'Error creating alert');
             }
