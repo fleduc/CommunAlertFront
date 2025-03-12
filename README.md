@@ -98,17 +98,35 @@ Follow these steps to set up the project on your local machine:
    ```bash
    git clone https://github.com/fleduc/CommunAlertFront.git
    cd communalert-frontend
+   ```
 
 2. **Install Dependencies**
 
    ```bash
    npm install
+   ```
    
 3. **Running the Application**
 
    ```bash
    npm run dev
+   ```
 
+4. **Go to the frontend**
+
+   ```bash
+   In your browser: http://localhost:5174/
+   ```
+5. **Test user accounts**
+
+   ```bash
+   After starting the backend containger and running the migration, 
+   you will find two test accounts in your DB:
+   
+   a)  username: "john@example.com" password: "password"
+   b)  username: "jane@example.com" password: "password"
+   ```
+###
 MAKE SURE TO ALSO INSTALL THE BACKEND BEFORE ACCESSING THIS FRONTEND APPLICATION
 Backend repo: https://github.com/fleduc/CommunAlertBack
 
