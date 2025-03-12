@@ -39,7 +39,7 @@ interface MessageItemProps {
  * @param {MessageItemProps} props - The props for the component.
  * @returns {JSX.Element} The rendered MessageItem component.
  */
-const MessageItem: React.FC<MessageItemProps> = ({ message, isMine, isOpen, onToggleReaction, onAddReaction }) => {
+const MessageItem: React.FC<MessageItemProps> = ({message, isMine, isOpen, onToggleReaction, onAddReaction}) => {
     // Aggregate reactions: e.g., { "👍": 2, "❤️": 1, ... }
     const aggregatedReactions = message.reactions.reduce((acc, reaction) => {
         acc[reaction.emoji] = (acc[reaction.emoji] || 0) + 1;
@@ -48,15 +48,23 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isMine, isOpen, onTo
 
     const hasReactions = Object.keys(aggregatedReactions).length > 0;
 
+    if (!message) {
+        return <p>Let's start the discussion…</p>;
+    }
+
     return (
-        <li className="mb-8">
+        <li className="mb-8 mr-2">
             <div
                 className={`relative flex ${isMine ? 'justify-end ml-8' : 'justify-start mr-8'}`}
                 onClick={() => onToggleReaction(message.id)}
             >
                 {/* The message block */}
-                <div className={`p-4 rounded-2xl min-w-[75%] ${isMine ? 'bg-blue-100 rounded-br-sm' : 'bg-gray-100 rounded-bl-sm'} relative`}>
-                    <p>{message.content}</p>
+                <div
+                    className={`p-4 rounded-2xl min-w-[75%] ${
+                        isMine ? 'bg-blue-100 rounded-br-sm' : 'bg-gray-100 rounded-bl-sm'
+                    } relative`}
+                >
+                    <p className="whitespace-pre-line">{message.content}</p>
                     <div className={isMine ? 'text-right' : 'text-left'}>
                         <span className="italic text-xs font-bold">{message.sender.username}</span>
                     </div>
@@ -64,15 +72,16 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isMine, isOpen, onTo
                     {/* Reaction bubble if at least one reaction exists */}
                     {hasReactions && (
                         <div
-                            className={`absolute bottom-[-20px] bg-gray-300 rounded-3xl p-1 pl-3 pr-3 flex items-center space-x-2
-                            ${isMine ? 'left-2 justify-start' : 'right-2 justify-end'}`}
+                            className={`absolute bottom-[-20px] bg-gray-300 rounded-3xl p-1 pl-3 pr-3 flex items-center space-x-2 ${
+                                isMine ? 'left-2 justify-start' : 'right-2 justify-end'
+                            }`}
                         >
                             {Object.entries(aggregatedReactions).map(([emoji, count]) => (
                                 <div key={emoji} className="relative text-lg">
                                     <span>{emoji}</span>
                                     {count > 1 && (
                                         <span className="absolute bottom-[-2px] right-[-5px] bg-red-500 text-white text-xs rounded-full px-1">
-                                            {count}
+                                          {count}
                                         </span>
                                     )}
                                 </div>

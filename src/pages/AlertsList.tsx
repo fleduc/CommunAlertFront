@@ -130,7 +130,7 @@ const AlertsList: React.FC = () => {
                                     e.stopPropagation();
                                     navigate(`/alerts/edit/${alert.id}`);
                                 }}
-                                className="absolute bottom-1 right-1 bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs"
+                                className="absolute bottom-1 right-1 bg-gray-700 hover:bg-gray-800 text-white px-2 py-1 rounded text-xs"
                                 title="Edit Alert"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -166,7 +166,7 @@ const AlertsList: React.FC = () => {
                     <div>
                         <button
                             onClick={() => navigate('/alerts/create')}
-                            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+                            className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded"
                         >
                             Add Alert
                         </button>

@@ -47,11 +47,21 @@ export interface Message {
  * @property {number} id - Unique identifier for the alert.
  * @property {string} alert_title - Title of the alert.
  * @property {string} description - Description of the alert.
- * @property {number} alert_type - Type of the alert.
- * @property {string} [closing_date] - Optional closing date for the alert.
+ * @property {number} alert_type - Numeric type of the alert.
+ * @property {'low' | 'medium' | 'high'} [severity_level] - Optional severity level of the alert.
+ * @property {string} [starting_date] - Optional starting date (ISO string) for the alert.
+ * @property {string} [closing_date] - Optional closing date (ISO string) for the alert.
+ * @property {number} [planned_duration] - Optional planned duration (in days) for the alert.
+ * @property {'open' | 'closed' | 'archived'} status - Current status of the alert.
+ * @property {boolean} public_status - Whether the alert is public.
  * @property {string} [postal_code] - Optional postal code.
- * @property {string} created_at - Creation date of the alert.
+ * @property {number} [longitude] - Optional longitude coordinate.
+ * @property {number} [latitude] - Optional latitude coordinate.
+ * @property {number} [radius] - Optional radius (in kilometers) for the alert.
+ * @property {string} [picture] - Optional URL/path to the alert's picture.
+ * @property {string} created_at - Creation date of the alert (ISO string).
  * @property {number} user_id - ID of the user who created the alert.
+ * @property {{ username: string }} user - The user who created the alert.
  * @property {Message[]} messages - List of messages associated with the alert.
  */
 export interface Alert {
@@ -59,9 +69,19 @@ export interface Alert {
     alert_title: string;
     description: string;
     alert_type: number;
+    severity_level?: 'low' | 'medium' | 'high';
+    starting_date?: string;
     closing_date?: string;
+    planned_duration?: number;
+    status: 'open' | 'closed' | 'archived';
+    public_status: boolean;
     postal_code?: string;
+    longitude?: number;
+    latitude?: number;
+    radius?: number;
+    picture?: string;
     created_at: string;
     user_id: number;
+    user: { username: string };
     messages: Message[];
 }
