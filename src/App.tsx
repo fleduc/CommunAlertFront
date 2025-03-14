@@ -21,25 +21,27 @@ import AlertEdit from './pages/AlertEdit';
 /**
  * ProtectedRoutes component that ensures only authenticated users can access certain routes.
  *
- * If the user is not authenticated, they are redirected to the login page.
+ * If the user is not authenticated (and loading is finished), they are redirected to the login page.
  *
  * @component
  * @returns {JSX.Element} The protected routes wrapped in a Layout component.
  */
 const ProtectedRoutes: React.FC = () => {
-    const { user } = useAuth();
-    // If user is null, redirect to /login
+    const { user, loading } = useAuth();
+    if (loading) {
+        return <div>Loading...</div>;
+    }
     if (!user) {
-        return <Navigate to="/login" />;
+        return <Navigate to="/login" replace />;
     }
     return (
         <Layout>
             <Routes>
                 <Route path="/alerts" element={<AlertsList />} />
                 <Route path="/alerts/:id" element={<AlertDetail />} />
-                <Route path="alerts/edit/:id" element={<AlertEdit />} />
-                <Route path="alerts/create" element={<AlertEdit />} />
-                <Route path="*" element={<Navigate to="/alerts" />} />
+                <Route path="/alerts/edit/:id" element={<AlertEdit />} />
+                <Route path="/alerts/create" element={<AlertEdit />} />
+                <Route path="*" element={<Navigate to="/alerts" replace />} />
             </Routes>
         </Layout>
     );
